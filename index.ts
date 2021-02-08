@@ -25,7 +25,7 @@ http
             "Content-Type": "application/json",
             "Content-disposition":
               "attachment; filename=" + sendString["name"] + ".json",
-            "Content-Length": sendString["content"].length,
+            // "Content-Length": sendString["content"].length,
           });
           res.write(sendString["content"]);
           res.end();

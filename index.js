@@ -17,8 +17,7 @@ http
                 console.log(sendString["content"]);
                 res.writeHead(200, {
                     "Content-Type": "application/json",
-                    "Content-disposition": "attachment; filename=" + sendString["name"] + ".json",
-                    "Content-Length": sendString["content"].length
+                    "Content-disposition": "attachment; filename=" + sendString["name"] + ".json"
                 });
                 res.write(sendString["content"]);
                 res.end();
