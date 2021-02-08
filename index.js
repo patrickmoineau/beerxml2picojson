@@ -203,6 +203,15 @@ function xmlToJsonRecipe(fileName) {
     if (adj4["boil time"] === 999) {
         adj4["boil time"] = 0;
     }
+    if (adj3["boil time"] === 999) {
+        adj3["boil time"] = 0;
+    }
+    if (adj2["boil time"] === 999) {
+        adj2["boil time"] = 0;
+    }
+    if (adj1["boil time"] === 999) {
+        adj1["boil time"] = 0;
+    }
     if (adj3["steps"].length > 0 && adj4["steps"].length > 0) {
         adj3["boil time"] = adj3["boil time"] - adj4["boil time"];
         adj3["steps"].forEach(function (step, index) {
