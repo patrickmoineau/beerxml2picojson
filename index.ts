@@ -13,16 +13,30 @@ http
     if (req.url == "/fileupload") {
       var form = new formidable.IncomingForm();
       form.parse(req, function (err, fields, files) {
-        sendString = xmlToJsonRecipe(files.filetoupload.path);
-        console.log(sendString["name"]);
-        console.log(sendString["content"]);
-        res.writeHead(200, {
-          "Content-Type": "application/json",
-          "Content-disposition": `attachment; filename=${sendString["name"]}.json`,
-          "Content-Length": sendString["content"].length,
-        });
-        res.write(sendString["content"]);
-        res.end();
+        if (
+          files.filetoupload.name.split(".")[
+            files.filetoupload.name.split(".").length - 1
+          ] == "xml"
+        ) {
+          sendString = xmlToJsonRecipe(files.filetoupload.path);
+          console.log(sendString["name"]);
+          console.log(sendString["content"]);
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Content-disposition":
+              "attachment; filename=" + sendString["name"] + ".json",
+            "Content-Length": sendString["content"].length,
+          });
+          res.write(sendString["content"]);
+          res.end();
+        } else {
+          res.writeHead(400, { "Content-Type": "text/html" });
+          res.write("Files is not .XML");
+          res.write(
+            `<form><input type="button" value="Go back!" onclick="history.back()"></form>`
+          );
+          res.end();
+        }
       });
     } else {
       res.writeHead(200, { "Content-Type": "text/html" });
