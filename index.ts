@@ -63,45 +63,14 @@ function xmlToJsonRecipe(fileName) {
   var recipe = {};
   var mashArray = [];
   var hopArray = [];
+  var miscArray = [];
+  var aromaArray = [];
+  var boilArray = [];
 
   recipe["clean"] = false;
   recipe["id"] = uuid.v1().split("-").join("");
   recipe["name"] = jsonData.RECIPES.RECIPE.NAME._text;
   recipe["steps"] = [];
-
-  if (jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP.length == null) {
-    mashArray.push(jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP);
-  } else {
-    mashArray = jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP;
-  }
-  if (jsonData.RECIPES.RECIPE.HOPS.HOP.length == null) {
-    hopArray.push(jsonData.RECIPES.RECIPE.HOPS.HOP);
-  } else {
-    hopArray = jsonData.RECIPES.RECIPE.HOPS.HOP;
-  }
-
-  mashArray.forEach((step) => {
-    let heatTo = {
-      drain_time: 0,
-      location: "PassThru",
-      name: `Heat to ${step.NAME._text}`,
-      step_time: 0,
-      temperature: Number(
-        ((Number(step.STEP_TEMP._text) * 9) / 5 + 32).toFixed(0)
-      ),
-    };
-    let thisStep = {
-      drain_time: 8,
-      location: "Mash",
-      name: `${step.NAME._text}`,
-      step_time: Number(step.STEP_TIME._text),
-      temperature: Number(
-        ((Number(step.STEP_TEMP._text) * 9) / 5 + 32).toFixed(0)
-      ),
-    };
-    recipe["steps"].push(heatTo);
-    recipe["steps"].push(thisStep);
-  });
 
   var adj1 = {};
   adj1["boil time"] = 999;
@@ -126,7 +95,58 @@ function xmlToJsonRecipe(fileName) {
 
   var isBoil = false;
 
-  hopArray.forEach((step) => {
+  if (jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP.length == null) {
+    mashArray.push(jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP);
+  } else {
+    mashArray = jsonData.RECIPES.RECIPE.MASH.MASH_STEPS.MASH_STEP;
+  }
+
+  if (jsonData.RECIPES.RECIPE.HOPS.HOP.length == null) {
+    hopArray.push(jsonData.RECIPES.RECIPE.HOPS.HOP);
+  } else {
+    hopArray = jsonData.RECIPES.RECIPE.HOPS.HOP;
+  }
+
+  if (jsonData.RECIPES.RECIPE.MISCS.MISC.length == null) {
+    miscArray.push(jsonData.RECIPES.RECIPE.MISCS.MISC);
+  } else {
+    miscArray = jsonData.RECIPES.RECIPE.MISCS.MISC;
+  }
+
+  miscArray.forEach((step) => {
+    if (step.USE._text == "Boil") {
+      hopArray.push(step);
+    }
+  });
+
+  boilArray = hopArray.sort((a, b) => {
+    return Number(b.TIME._text) - Number(a.TIME._text);
+  });
+
+  mashArray.forEach((step) => {
+    let heatTo = {
+      drain_time: 0,
+      location: "PassThru",
+      name: `Heat to ${step.NAME._text}`,
+      step_time: 0,
+      temperature: Number(
+        ((Number(step.STEP_TEMP._text) * 9) / 5 + 32).toFixed(0)
+      ),
+    };
+    let thisStep = {
+      drain_time: 8,
+      location: "Mash",
+      name: `${step.NAME._text}`,
+      step_time: Number(step.STEP_TIME._text),
+      temperature: Number(
+        ((Number(step.STEP_TEMP._text) * 9) / 5 + 32).toFixed(0)
+      ),
+    };
+    recipe["steps"].push(heatTo);
+    recipe["steps"].push(thisStep);
+  });
+
+  boilArray.forEach((step) => {
     if (step.USE._text == "First Wort") {
       if (!isBoil) {
         var boil = {
@@ -150,7 +170,7 @@ function xmlToJsonRecipe(fileName) {
       adj1["use"] = "First Wort";
       adj1["steps"].push(firstWort);
     }
-    if (step.USE._text == "Boil" || step.USE._text == "Aroma") {
+    if (step.USE._text == "Boil") {
       if (adj1["steps"] == 0 || adj1["boil time"] == Number(step.TIME._text)) {
         let addition = {
           drain_time: 0,
@@ -213,6 +233,9 @@ function xmlToJsonRecipe(fileName) {
           adj4["use"] = step.USE._text;
         }
       }
+    }
+    if (step.USE._text == "Aroma") {
+      aromaArray.push(step);
     }
   });
 
