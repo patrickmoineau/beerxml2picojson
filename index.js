@@ -3,6 +3,7 @@ const convert = require("xml-js");
 const uuid = require("uuid");
 const formidable = require("formidable");
 const http = require("http");
+const PORT = process.env.PORT || 8080;
 
 var sendString;
 
@@ -31,7 +32,9 @@ http
       return res.end();
     }
   })
-  .listen(8080);
+  .listen(PORT, () => {
+    console.log(`Running on port ${PORT}`);
+  });
 
 function xmlToJsonRecipe(fileName) {
   const xmlFile = fs.readFileSync(fileName, "utf8");
